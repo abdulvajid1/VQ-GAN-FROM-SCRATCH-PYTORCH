@@ -7,8 +7,8 @@ from helper import (ResidualBlock,
 
 
 class Decoder(nn.Module):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, args) -> None:
+        super().__init__()
         channels = [512, 256, 256, 128, 128]
         attn_resolution = [16]
         num_res_blocks = 3
@@ -42,3 +42,32 @@ class Decoder(nn.Module):
     def forward(self, x):
         return self.decoder(x)
 
+
+
+if __name__ == "__main__":
+    import argparse
+
+    args = argparse.Namespace(
+    latent_dim=256,
+    image_size=256,
+    num_codebook_vectors=1024,
+    beta=0.25,
+    img_channels=3,
+    dataset_path=r"C:\Users\dome\datasets\flowers",
+    checkpoint_path=r".\checkpoints\vqgan_last_ckpt.pt",
+    device="cuda",
+    batch_size=20,
+    epochs=100,
+    learning_rate=2.25e-05,
+    beta1=0.5,
+    beta2=0.9,
+    disc_start=10000,
+    disc_factor=1.0,
+    l2_loss_factor=1.0,
+    perceptual_loss_factor=1.0,
+    pkeep=0.5,
+    sos_token=0
+)
+    decoder = Decoder(args)
+    x = torch.rand(1, 3, 256, 256)
+    print(decoder(x).shape)

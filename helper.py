@@ -9,7 +9,7 @@ class ResidualBlock(nn.Module):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
         self.block = nn.Sequential(
-            nn.GroupNorm(num_groups=32, num_channels=out_channels),
+            nn.GroupNorm(num_groups=32, num_channels=in_channels),
             nn.SiLU(),
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding=1, stride=1),
             nn.GroupNorm(num_groups=32, num_channels=out_channels),
