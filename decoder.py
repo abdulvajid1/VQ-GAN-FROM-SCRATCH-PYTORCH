@@ -38,6 +38,7 @@ class Decoder(nn.Module):
         layers.append(nn.SiLU())
         layers.append(nn.Conv2d(in_channels, args.img_channels, 3, 1, 1))
         self.decoder = nn.Sequential(*layers)
+        # print(self.decoder)
 
     def forward(self, x):
         return self.decoder(x)
@@ -69,5 +70,5 @@ if __name__ == "__main__":
     sos_token=0
 )
     decoder = Decoder(args)
-    x = torch.rand(1, 3, 256, 256)
+    x = torch.rand(1, 256, 16, 16)
     print(decoder(x).shape)

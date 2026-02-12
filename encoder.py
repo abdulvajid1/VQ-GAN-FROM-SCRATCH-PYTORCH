@@ -9,7 +9,7 @@ from helper import (ResidualBlock,
 class Encoder(nn.Module):
     def __init__(self, args) -> None:
         super().__init__()
-        channels = [128, 128, 128, 128, 256, 256, 512]
+        channels = [128, 128, 128, 256, 256, 512]
         attn_res = [16] # img resolutions where we add attn block
         num_res_blocks = 2 # no. of res block add at each time
         curr_img_resolution = 256 # initial img resolution

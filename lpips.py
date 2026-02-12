@@ -102,19 +102,19 @@ class VGG16(nn.Module):
         for param in self.parameters():
             param.requires_grad = False
 
-        def forward(self, x):
-            h = self.slice1(x)
-            h_relu1 = h
-            h = self.slice2(h)
-            h_relu2 = h
-            h = self.slice3(h)
-            h_relu3 = h
-            h = self.slice4(h)
-            h_relu4 = h
-            h = self.slice5(h)
-            h_relu5 = h
-            vgg_outputs = namedtuple('VGGoutput', ['relu1', 'relu2', 'relue3', 'relu4', 'relu5'])
-            return vgg_outputs(h_relu1, h_relu2, h_relu3, h_relu4, h_relu5)
+    def forward(self, x):
+        h = self.slice1(x)
+        h_relu1 = h
+        h = self.slice2(h)
+        h_relu2 = h
+        h = self.slice3(h)
+        h_relu3 = h
+        h = self.slice4(h)
+        h_relu4 = h
+        h = self.slice5(h)
+        h_relu5 = h
+        vgg_outputs = namedtuple('VGGoutput', ['relu1', 'relu2', 'relue3', 'relu4', 'relu5'])
+        return vgg_outputs(h_relu1, h_relu2, h_relu3, h_relu4, h_relu5)
         
 
     
@@ -135,4 +135,9 @@ def spatial_average(x):
     :return: averaged images along width and height
     """
     return x.mean([2, 3], keepdim=True)
+
+
+
+if __name__ == "__main__":
+    vgg = VGG16()
             
