@@ -38,7 +38,7 @@ def get_ckpt_path(name, root):
 
 class LPIPS(nn.Module):
     def __init__(self):
-        super(LPIPS, self).__init__()
+        super().__init__()
         self.scaling_layer = ScalingLayer()
         self.channels = [64, 128, 256, 512, 512]
         self.vgg = VGG16()
@@ -55,9 +55,9 @@ class LPIPS(nn.Module):
         for param in self.parameters():
             param.requires_grad = False
     
-    def load_from_pratrained(self, name="vgg_lpips"):
+    def load_from_pretrained(self, name="vgg_lpips"):
         ckpt = get_ckpt_path(name, name)
-        self.load_state_dict(torch.load(ckpt, map_location=torch.device('cpu')), strict=True)
+        self.load_state_dict(torch.load(ckpt, map_location=torch.device('cpu')), strict=False)
     
     def forward(self, real_x, fake_x):
         features_real = self.vgg(self.scaling_layer(real_x))
@@ -67,6 +67,8 @@ class LPIPS(nn.Module):
         for i in range(len(self.channels)):
             diffs[i] = norm_tensor(features_real[i] - norm_tensor(features_fake[i]))**2
 
+        print(diffs[0].shape)
+
         return sum([spatial_average(self.lins[i].model(diffs[i])) for i in range(len(self.channels))])
     
 
@@ -74,7 +76,7 @@ class ScalingLayer(nn.Module):
     def __init__(self):
         super(ScalingLayer, self).__init__()
         self.register_buffer("shift", torch.Tensor([-.030, -.088, -.188])[None, :, None, None])
-        self.register_buffer("scalle", torch.Tensor([-.030, -.088, -.188])[None, :, None, None])
+        self.register_buffer("scale", torch.Tensor([-.030, -.088, -.188])[None, :, None, None])
 
     def forward(self, x):
         return (x - self.shift) / self.scale
@@ -139,5 +141,11 @@ def spatial_average(x):
 
 
 if __name__ == "__main__":
-    vgg = VGG16()
+    loss = LPIPS()
+    loss.eval()
+    torch.manual_seed(0)
+    x = torch.rand(1, 3, 256, 256)
+    y = torch.rand(1, 3, 256, 256)
+    with torch.no_grad():
+        print(loss(x, y))
             
