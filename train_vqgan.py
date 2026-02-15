@@ -7,13 +7,13 @@ import torch.nn.functional as F
 from torchvision import utils as vutils
 from discriminator import Discriminator
 from lpips import LPIPS
-from vqgan import VQGAN
+from vqgan import VQGan
 from utils import load_data, weights_init
 
 
 class TrainVQGAN:
     def __init__(self, args):
-        self.vqgan = VQGAN(args).to(device=args.device)
+        self.vqgan = VQGan(args).to(device=args.device)
         self.discriminator = Discriminator(args).to(device=args.device)
         self.discriminator.apply(weights_init)
         self.perceptual_loss = LPIPS().eval().to(device=args.device)

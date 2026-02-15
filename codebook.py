@@ -24,7 +24,6 @@ class Codebook(nn.Module):
         
         # for each z, taking its closest embedding
         dist_indices = torch.argmin(e_distances, dim=1)
-
         zq = self.embedding(dist_indices).view(z.shape) # same shape as image
 
         # loss

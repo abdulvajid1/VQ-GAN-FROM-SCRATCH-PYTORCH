@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mingpt import GPT
-from vqgan import VQGAN
+from vqgan import VQGan
 
 
 class VQGANTransformer(nn.Module):
@@ -26,8 +26,8 @@ class VQGANTransformer(nn.Module):
 
     @staticmethod
     def load_vqgan(args):
-        model = VQGAN(args)
-        model.load_checkpoint(args.checkpoint_path)
+        model = VQGan(args)
+        # model.load_checkpoint(args.checkpoint_path)
         model = model.eval()
         return model
 
@@ -45,17 +45,21 @@ class VQGANTransformer(nn.Module):
         return image
 
     def forward(self, x):
-        _, indices = self.encode_to_z(x)
+        _, indices = self.encode_to_z(x) # one image have 256 vectors, so indices is telling the argmin index of each 256 vector in embedding 1024 vectors
+
+        print("indices", indices.shape)
 
         sos_tokens = torch.ones(x.shape[0], 1) * self.sos_token
-        sos_tokens = sos_tokens.long().to("cuda")
+        print(f'Sos :{sos_tokens}')
+        sos_tokens = sos_tokens.long().to("cpu")
 
         mask = torch.bernoulli(self.pkeep * torch.ones(indices.shape, device=indices.device))
         mask = mask.round().to(dtype=torch.int64)
-        random_indices = torch.randint_like(indices, self.transformer.config.vocab_size)
-        new_indices = mask * indices + (1 - mask) * random_indices
+        random_indices = torch.randint_like(indices, self.transformer.config.vocab_size) # creating full random indices, which then replaces in some places of 
+        new_indices = mask * indices + (1 - mask) * random_indices # new_indices = original indices + correpted indices
 
         new_indices = torch.cat((sos_tokens, new_indices), dim=1)
+        print(new_indices.shape)
 
         target = indices
 
@@ -116,6 +120,32 @@ class VQGANTransformer(nn.Module):
         return log, torch.concat((x, x_rec, half_sample, full_sample))
 
 
+if __name__ == "__main__":
+    import argparse
+    args = argparse.Namespace(
+    latent_dim=256,
+    image_size=256,
+    num_codebook_vectors=1024,
+    beta=0.25,
+    img_channels=3,
+    dataset_path=r"C:\Users\dome\datasets\flowers",
+    checkpoint_path=r".\checkpoints\vqgan_last_ckpt.pt",
+    device="cuda",
+    batch_size=20,
+    epochs=100,
+    learning_rate=2.25e-05,
+    beta1=0.5,
+    beta2=0.9,
+    disc_start=10000,
+    disc_factor=1.0,
+    l2_loss_factor=1.0,
+    perceptual_loss_factor=1.0,
+    pkeep=0.5,
+    sos_token=0
+)
+    vq = VQGANTransformer(args)
+    x = torch.rand(1, 3, 256, 256)
+    vq(x)
 
 
 
